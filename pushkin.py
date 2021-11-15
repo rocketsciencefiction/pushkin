@@ -89,12 +89,12 @@ class Pushkin:
             while commands:
                 command = commands.popleft()
                 if command:
+                    if self.send_command_timeout:
+                        sleep(self.send_command_timeout)
                     if self.socket_write_ready():
                         self.socket.send(bytes(command + newline, 'ascii'))
                     else:
                         commands.appendleft(command)
-                    if self.send_command_timeout:
-                        sleep(self.send_command_timeout)
             return True
         return False
 
@@ -138,7 +138,6 @@ class Pushkin:
                 if output:
                     f.write(output)
             sleep(self.background_read_timeout)
-
 
 
 
