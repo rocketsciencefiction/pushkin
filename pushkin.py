@@ -14,7 +14,7 @@ logging.basicConfig(filename="/tmp/pushkin-send-commands.log", level=logging.DEB
 class Pushkin:
 
     def __init__(
-            self, ip, port, name, model, username, password, 
+            self, ip, port, name, model, username, password,
             enable_password=None, enable_command=None,
         ):
         self.name = name
@@ -30,16 +30,16 @@ class Pushkin:
         self.background_read_thread_lock = Lock()
         self.background_read_timeout = .8
         self.background_read_tick = 30
-        self.output_path = "/var/pushkin/ssh/output/"
+        self.output_path = "out/"
         self.socket = None
-        
+
         self.init_socket()
         self.connect_socket()
-        
+
         if not self.socket:
             raise Exception("Can't establish socket connection {}:{}".format(ip, port))
 
-        
+
 
     def init_socket(self):
         socket = None
@@ -64,7 +64,7 @@ class Pushkin:
     def enable(self):
         self.send_commands([self.enable_command, self.enable_password])
 
-    
+
     def socket_write_ready(self):
         if self.port == 22:
             return self.socket.send_ready()
@@ -81,7 +81,7 @@ class Pushkin:
         attr = sftp.put(path_local, path_remote)
         if not isinstance(attr, SFTPAttributes):
             raise Exception("Could not upload file to remote ssh host")
-        
+
 
     def send_commands(self, commands, newline='\n'):
         if commands:
@@ -132,13 +132,12 @@ class Pushkin:
 
     def start_outputting(self):
         self.run_background_read_thread()
-        with open("{}/{}".format(self.output_path, self.ip), 'a+') as f:
-            f.write("this is log for {}".format(self.ip))
-            while self.background_read_thread.is_alive():
+        while self.background_read_thread.is_alive():
+            with open("{}/{}".format(self.output_path, self.ip), 'a+') as f:
                 output = self.get_output()
                 if output:
                     f.write(output)
-                sleep(self.background_read_timeout)
+            sleep(self.background_read_timeout)
 
 
 
