@@ -7,6 +7,7 @@ from collections import deque
 from select import select
 from time import sleep
 from threading import Thread, Lock
+from getpass import getpass
 
 logging.basicConfig(filename="/tmp/pushkin-send-commands.log", level=logging.DEBUG)
 
@@ -14,10 +15,9 @@ logging.basicConfig(filename="/tmp/pushkin-send-commands.log", level=logging.DEB
 class Pushkin:
 
     def __init__(
-            self, ip, port, name, model, username, password,
+            self, ip, port, username, password,
             enable_password=None, enable_command=None,
         ):
-        self.name = name
         self.ip = ip
         self.port = port
         self.username = username
@@ -139,5 +139,15 @@ class Pushkin:
                     f.write(output)
             sleep(self.background_read_timeout)
 
+
+def main():
+    # Test client for the Pushkin class
+    p = Pushkin('10.10.10.1', 22, 'admin', getpass('pass:'))
+    p.send_commands(['show version'])
+    p.start_outputting()  # this 'hangs' until background thread completes, that's intended
+
+
+if __name__ == '__main__':
+    main()
 
 
